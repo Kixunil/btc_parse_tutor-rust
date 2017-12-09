@@ -69,6 +69,28 @@ impl Outpoint {
     }
 }
 
+/// Contains data about single transaction input.
+struct TxInput {
+    outpoint: Outpoint,
+    sig_script: Script,
+    sequence: u32,
+}
+
+impl TxInput {
+    /// Deserializes the input from the blockchain data
+    fn deserialize<R: Read>(reader: &mut R) -> io::Result<Self> {
+        let outpoint = Outpoint::deserialize(reader)?;
+        let sig_script = Script::deserialize(reader)?;
+        let sequence = reader.read_u32::<LE>()?;
+
+        Ok(TxInput {
+            outpoint,
+            sig_script,
+            sequence,
+        })
+    }
+}
+
 fn main() {
     println!("Hello, world!");
 }
