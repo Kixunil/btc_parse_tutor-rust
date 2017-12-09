@@ -91,6 +91,25 @@ impl TxInput {
     }
 }
 
+/// Contains data about single transaction output.
+struct TxOutput {
+    satoshis: u64,
+    verify_script: Script,
+}
+
+impl TxOutput {
+    /// Deserializes the input from the blockchain data
+    fn deserialize<R: Read>(reader: &mut R) -> io::Result<Self> {
+        let satoshis = reader.read_u64::<LE>()?;
+        let verify_script = Script::deserialize(reader)?;
+
+        Ok(TxOutput {
+            satoshis,
+            verify_script
+        })
+    }
+}
+
 fn main() {
     println!("Hello, world!");
 }
