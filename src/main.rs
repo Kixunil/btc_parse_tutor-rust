@@ -35,6 +35,19 @@ impl Script {
     }
 }
 
+/// Represents 256 bit hash. (SHA256)
+struct Hash256([u8; 32]);
+
+impl Hash256 {
+    /// Deserializes the hash
+    fn deserialize<R: Read>(reader: &mut R) -> io::Result<Self> {
+        let mut buf = [0; 32];
+        reader.read_exact(&mut buf)?;
+
+        Ok(Hash256(buf))
+    }
+}
+
 fn main() {
     println!("Hello, world!");
 }
