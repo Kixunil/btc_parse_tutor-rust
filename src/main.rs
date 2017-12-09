@@ -110,6 +110,50 @@ impl TxOutput {
     }
 }
 
+/// Contains data about single transaction
+struct Transaction {
+    version: u32,
+    inputs: Vec<TxInput>,
+    outputs: Vec<TxOutput>,
+    lock_time: u32,
+}
+
+impl Transaction {
+    fn deserialize<R: Read>(reader: &mut R) -> io::Result<Self> {
+        let version = reader.read_u32::<LE>()?;
+        let input_count = deserialize_varint(reader)?;
+
+        // Sanity check. Since block can contain only 1M of bytes and each input
+        // has more than one byte, this can't happen for valid transaction.
+        if input_count > 1_000_000 {
+            return Err(ErrorKind::InvalidData.into());
+        }
+        let mut inputs = Vec::with_capacity(input_count as usize);
+        for _ in 0..input_count {
+            inputs.push(TxInput::deserialize(reader)?);
+        }
+
+        let output_count = deserialize_varint(reader)?;
+        // Sanity check. Since block can contain only 1M of bytes and each input
+        // has more than one byte, this can't happen for valid transaction.
+        if output_count > 1_000_000 {
+            return Err(ErrorKind::InvalidData.into());
+        }
+        let mut outputs = Vec::with_capacity(output_count as usize);
+        for _ in 0..output_count {
+            outputs.push(TxOutput::deserialize(reader)?);
+        }
+        let lock_time = reader.read_u32::<LE>()?;
+
+        Ok(Transaction {
+            version,
+            inputs,
+            outputs,
+            lock_time,
+        })
+    }
+}
+
 fn main() {
     println!("Hello, world!");
 }
