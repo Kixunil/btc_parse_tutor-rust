@@ -48,6 +48,27 @@ impl Hash256 {
     }
 }
 
+/// Defines "outpoint" - output of previous transaction being consumed.
+struct Outpoint {
+    /// ID of previous transaction
+    txid: Hash256,
+    /// Which output of the previous transaction is being consumed.
+    index: u32,
+}
+
+impl Outpoint {
+    /// Deserializes the outpoint from the blockchain data
+    fn deserialize<R: Read>(reader: &mut R) -> io::Result<Self> {
+        let txid = Hash256::deserialize(reader)?;
+        let index = reader.read_u32::<LE>()?;
+
+        Ok(Outpoint {
+            txid,
+            index,
+        })
+    }
+}
+
 fn main() {
     println!("Hello, world!");
 }
